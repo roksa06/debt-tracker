@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Debt Tracker - ROKSA</title>
+  <title>Money Planner - ROKSA</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap');
@@ -32,9 +32,9 @@
       border-radius: 12px;
       box-shadow: 0 4px 20px rgba(255, 255, 255, 0.05);
       color: #ffffff;
+      margin-bottom: 30px;
     }
-    h1 {
-      margin-top: 0;
+    h1, h2 {
       color: #ffffff;
       font-weight: 700;
       letter-spacing: 1px;
@@ -43,6 +43,7 @@
       display: flex;
       gap: 10px;
       margin-bottom: 20px;
+      flex-wrap: wrap;
     }
     .input-row {
       display: grid;
@@ -75,44 +76,25 @@
       font-weight: 600;
       border: none;
     }
-    #addBtn {
+    #addBtn, #setWeeklyIncomeBtn, #addWeekCatBtn, #savePayment, #saveEdit, #confirmComplete, #confirmDelete {
       background: linear-gradient(135deg, #2563eb, #1d4ed8);
       color: white;
       font-weight: 700;
     }
-    #addBtn:hover {
+    #addBtn:hover, #setWeeklyIncomeBtn:hover, #addWeekCatBtn:hover, #savePayment:hover, #saveEdit:hover, #confirmComplete:hover, #confirmDelete:hover {
       background: linear-gradient(135deg, #1e40af, #1e3a8a);
       transform: translateY(-1px);
       box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
     }
-    #completedBtn {
+    #completedBtn, #archiveBtn {
       background: linear-gradient(135deg, #6b7280, #4b5563);
       color: white;
       font-weight: 700;
     }
-    #completedBtn:hover {
+    #completedBtn:hover, #archiveBtn:hover {
       background: linear-gradient(135deg, #4b5563, #374151);
       transform: translateY(-1px);
       box-shadow: 0 4px 8px rgba(107, 114, 128, 0.3);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      color: #fff;
-    }
-    th, td {
-      padding: 12px 10px;
-      border-bottom: 1px solid #333;
-      text-align: left;
-    }
-    th {
-      background: #1a1a1a;
-      color: #ccc;
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-weight: 600;
     }
     .action-btn, .edit-btn, .complete-btn, .delete-btn {
       padding: 8px 12px;
@@ -161,7 +143,7 @@
       transform: translateY(-1px);
       box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
     }
-    .summary {
+    .summary, .budget-summary {
       display: flex;
       flex-wrap: wrap;
       gap: 20px;
@@ -172,10 +154,10 @@
       color: #fff;
       font-weight: 500;
     }
-    .summary div {
+    .summary div, .budget-summary div {
       font-size: 15px;
     }
-    .summary span {
+    .summary span, .budget-summary span {
       font-weight: 700;
       color: #fff;
     }
@@ -186,7 +168,7 @@
       font-weight: 400;
     }
     /* Progress bar styles */
-    .progress-container {
+    .progress-container, .budget-progress-container {
       width: 120px;
       height: 18px;
       background: #222;
@@ -195,31 +177,31 @@
       position: relative;
       border: 1px solid #444;
     }
-    .progress-bar {
+    .progress-bar, .budget-progress-bar {
       height: 100%;
       background: linear-gradient(90deg, #4ade80, #22c55e);
       border-radius: 10px;
       transition: width 0.4s ease;
     }
-    .progress-text {
+    .progress-text, .budget-progress-text {
       font-size: 13px;
       margin-left: 8px;
       color: #ccc;
       white-space: nowrap;
       font-weight: 500;
     }
-    .progress-cell {
+    .progress-cell, .budget-progress-cell {
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    /* Pulse animation for progress bar after payment */
+    /* Pulse animation */
     @keyframes pulse {
       0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
       50% { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); }
       100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
     }
-    .progress-bar.pulse {
+    .progress-bar.pulse, .budget-progress-bar.pulse {
       animation: pulse 0.8s ease-out;
     }
     /* Modals */
@@ -258,6 +240,7 @@
       justify-content: flex-end;
       gap: 10px;
       margin-top: 16px;
+      flex-wrap: wrap;
     }
     .modal-buttons button {
       padding: 8px 16px;
@@ -266,11 +249,11 @@
       cursor: pointer;
       font-weight: 600;
     }
-    #savePayment, #saveEdit, #confirmComplete, #confirmDelete {
+    #savePayment, #saveEdit, #confirmComplete, #confirmDelete, #saveSpend {
       background: #2563eb;
       color: white;
     }
-    #savePayment:hover, #saveEdit:hover, #confirmComplete:hover, #confirmDelete:hover {
+    #savePayment:hover, #saveEdit:hover, #confirmComplete:hover, #confirmDelete:hover, #saveSpend:hover {
       background: #1d4ed8;
     }
     #confirmComplete {
@@ -285,11 +268,11 @@
     #confirmDelete:hover {
       background: #dc2626;
     }
-    #cancelPayment, #cancelEdit, #cancelComplete, #cancelDelete, #closeCompleted {
+    #cancelPayment, #cancelEdit, #cancelComplete, #cancelDelete, #cancelSpend, #closeCompleted, #closeArchive, #closeDeleteBudget {
       background: #444;
       color: white;
     }
-    #cancelPayment:hover, #cancelEdit:hover, #cancelComplete:hover, #cancelDelete:hover, #closeCompleted:hover {
+    #cancelPayment:hover, #cancelEdit:hover, #cancelComplete:hover, #cancelDelete:hover, #cancelSpend:hover, #closeCompleted:hover, #closeArchive:hover, #closeDeleteBudget:hover {
       background: #555;
     }
     /* Live preview in modal */
@@ -308,19 +291,22 @@
       font-weight: 400;
     }
     /* Completed debts table */
-    .completed-table {
+    .completed-table, .archive-table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
       color: #fff;
     }
     .completed-table th,
-    .completed-table td {
+    .completed-table td,
+    .archive-table th,
+    .archive-table td {
       padding: 8px;
       border-bottom: 1px solid #333;
       text-align: left;
     }
-    .completed-table th {
+    .completed-table th,
+    .archive-table th {
       background: #1a1a1a;
       color: #ccc;
       font-size: 12px;
@@ -331,6 +317,27 @@
       padding: 12px;
       background: #1a1a1a;
       border-radius: 8px;
+      font-weight: 600;
+    }
+    /* Weekly budget table */
+    .budget-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      color: #fff;
+    }
+    .budget-table th,
+    .budget-table td {
+      padding: 10px;
+      border-bottom: 1px solid #333;
+      text-align: left;
+    }
+    .budget-table th {
+      background: #1a1a1a;
+      color: #ccc;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
       font-weight: 600;
     }
     /* Fireworks canvas */
@@ -353,11 +360,26 @@
       opacity: 0.6;
       letter-spacing: 2px;
     }
+    /* Archive total row */
+    .archive-total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .archive-total-summary {
+      font-weight: 600;
+      font-size: 15px;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
+  <!-- Debt Tracker Container -->
   <div class="container">
-    <h1>Debt Tracker</h1>
+    <h1>Money Planner</h1>
 
     <div class="header-buttons">
       <button id="completedBtn">Completed Debts</button>
@@ -394,6 +416,50 @@
       <div>Total Balance: <span id="totalBalance">$0.00</span></div>
       <div>Total Min Payments: <span id="totalMin">$0.00</span></div>
       <div>Avg Interest Rate: <span id="avgInterest">0.00%</span></div>
+    </div>
+  </div>
+
+  <!-- Weekly Budget Container -->
+  <div class="container">
+    <h2>Weekly Budget</h2>
+
+    <div class="header-buttons">
+      <button id="archiveBtn">Weekly Budget Archive</button>
+    </div>
+
+    <div class="input-row">
+      <input type="number" id="weeklyIncome" placeholder="Take home pay" step="0.01" min="0">
+      <button id="setWeeklyIncomeBtn">Set Pay</button>
+    </div>
+
+    <div class="input-row">
+      <input type="text" id="weekCatName" placeholder="Expense category">
+      <input type="number" id="weekCatBudget" placeholder="Weekly budget" step="0.01" min="0">
+      <button id="addWeekCatBtn">+ Add</button>
+    </div>
+
+    <table class="budget-table">
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Budgeted</th>
+          <th>Spent</th>
+          <th>Remaining</th>
+          <th>Progress</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="weeklyBudgetList"></tbody>
+    </table>
+    <div id="budgetEmpty" class="empty">No categories added yet.</div>
+
+    <div class="budget-summary">
+      <div>Take Home Pay: <span id="weekIncomeDisplay">$0.00</span></div>
+      <div>Total Budgeted: <span id="weekTotalBudget">$0.00</span></div>
+      <div>Left to Budget: <span id="weekLeftToBudget">$0.00</span></div>
+      <div>Total Spent: <span id="weekTotalSpent">$0.00</span></div>
+      <div>Remaining: <span id="weekRemaining">$0.00</span></div>
+      <div><button id="resetWeekBtn" style="background: #ef4444; color: white;">Start New Week</button></div>
     </div>
   </div>
 
@@ -464,11 +530,48 @@
   <div id="completedModal" class="modal">
     <div class="modal-content">
       <h2>Completed Debts</h2>
-      <div id="completedListContainer">
-        <!-- Completed debts will be rendered here -->
-      </div>
+      <div id="completedListContainer"></div>
       <div class="modal-buttons" style="margin-top: 16px;">
         <button id="closeCompleted">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Spending Modal -->
+  <div id="spendModal" class="modal">
+    <div class="modal-content">
+      <h2>Add Spending</h2>
+      <p id="spendCategoryName" style="margin-bottom:8px;"></p>
+      <input type="number" id="spendAmount" step="0.01" min="0" placeholder="Amount spent">
+      <div class="modal-buttons">
+        <button id="cancelSpend">Cancel</button>
+        <button id="saveSpend">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Budget Category Modal -->
+  <div id="deleteBudgetModal" class="modal">
+    <div class="modal-content">
+      <h2>Delete Category</h2>
+      <p id="deleteBudgetName" style="margin-bottom:16px;"></p>
+      <div class="modal-buttons">
+        <button id="cancelDeleteBudget">Cancel</button>
+        <button id="confirmDeleteBudget">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weekly Archive Modal -->
+  <div id="archiveModal" class="modal">
+    <div class="modal-content">
+      <h2>Weekly Budget Archive</h2>
+      <div id="archiveListContainer"></div>
+      <div class="archive-total-row">
+        <div id="archiveTotalSummary" class="archive-total-summary"></div>
+        <div class="modal-buttons" style="margin-top: 0;">
+          <button id="closeArchive">Close</button>
+        </div>
       </div>
     </div>
   </div>
@@ -477,7 +580,7 @@
   <canvas id="fireworksCanvas"></canvas>
 
   <script>
-    // DOM elements
+    // ========== DEBT TRACKER CODE ==========
     const addBtn = document.getElementById('addBtn');
     const debtList = document.getElementById('debtList');
     const emptyMessage = document.getElementById('emptyMessage');
@@ -486,7 +589,6 @@
     const avgInterestEl = document.getElementById('avgInterest');
     const completedBtn = document.getElementById('completedBtn');
 
-    // Payment modal
     const paymentModal = document.getElementById('paymentModal');
     const paymentInput = document.getElementById('paymentInput');
     const paymentDebtName = document.getElementById('paymentDebtName');
@@ -495,7 +597,6 @@
     const previewProgressBar = document.getElementById('previewProgressBar');
     const previewProgressText = document.getElementById('previewProgressText');
 
-    // Edit modal
     const editModal = document.getElementById('editModal');
     const editName = document.getElementById('editName');
     const editCreditor = document.getElementById('editCreditor');
@@ -506,24 +607,20 @@
     const saveEditBtn = document.getElementById('saveEdit');
     const cancelEditBtn = document.getElementById('cancelEdit');
 
-    // Complete modal
     const completeModal = document.getElementById('completeModal');
     const completeDebtName = document.getElementById('completeDebtName');
     const confirmCompleteBtn = document.getElementById('confirmComplete');
     const cancelCompleteBtn = document.getElementById('cancelComplete');
 
-    // Permanent delete modal
     const deleteModal = document.getElementById('deleteModal');
     const deleteDebtName = document.getElementById('deleteDebtName');
     const confirmDeleteBtn = document.getElementById('confirmDelete');
     const cancelDeleteBtn = document.getElementById('cancelDelete');
 
-    // Completed modal
     const completedModal = document.getElementById('completedModal');
     const completedListContainer = document.getElementById('completedListContainer');
     const closeCompletedBtn = document.getElementById('closeCompleted');
 
-    // Fireworks
     const fireworksCanvas = document.getElementById('fireworksCanvas');
     const ctx = fireworksCanvas.getContext('2d');
     let particles = [];
@@ -534,11 +631,9 @@
     const BURST_COUNT = 10;
     const PARTICLE_COUNT = 100;
 
-    // Storage keys
     const STORAGE_KEY = 'debtTrackerDebts';
     const COMPLETED_STORAGE_KEY = 'debtTrackerCompletedDebts';
 
-    // State
     let debts = loadDebts();
     let completedDebts = loadCompletedDebts();
     let currentEditIndex = null;
@@ -546,7 +641,6 @@
     let currentCompleteIndex = null;
     let currentDeleteIndex = null;
 
-    // Helper functions
     function loadDebts() {
       try {
         const stored = localStorage.getItem(STORAGE_KEY);
@@ -575,19 +669,11 @@
     }
 
     function saveDebts(debts) {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(debts));
-      } catch (err) {
-        alert('Could not save debt. Error: ' + err.message);
-      }
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(debts)); } catch (err) { alert('Could not save debt.'); }
     }
 
     function saveCompletedDebts(completedDebts) {
-      try {
-        localStorage.setItem(COMPLETED_STORAGE_KEY, JSON.stringify(completedDebts));
-      } catch (err) {
-        alert('Could not save completed debts. Error: ' + err.message);
-      }
+      try { localStorage.setItem(COMPLETED_STORAGE_KEY, JSON.stringify(completedDebts)); } catch (err) { alert('Could not save completed debts.'); }
     }
 
     function formatCurrency(value) {
@@ -610,39 +696,24 @@
       return percent;
     }
 
-    // Render active debts
-    function render() {
+    function renderDebts() {
       debtList.innerHTML = '';
       emptyMessage.style.display = debts.length === 0 ? 'block' : 'none';
-
-      let totalBalance = 0;
-      let totalMin = 0;
-      let weightedInterestSum = 0;
-
+      let totalBalance = 0, totalMin = 0, weightedInterestSum = 0;
       debts.forEach((debt, index) => {
         const balance = parseFloat(debt.balance) || 0;
         const interest = parseFloat(debt.interest) || 0;
         const minPayment = parseFloat(debt.minPayment) || 0;
-
         totalBalance += balance;
         totalMin += minPayment;
         weightedInterestSum += balance * interest;
-
         const progress = calculateProgress(debt);
-
         const row = document.createElement('tr');
         row.innerHTML = `
           <td>${escapeHtml(debt.name)}</td>
           <td>${escapeHtml(debt.creditor || '—')}</td>
           <td>${formatCurrency(balance)}</td>
-          <td>
-            <div class="progress-cell">
-              <div class="progress-container">
-                <div class="progress-bar" style="width: ${progress}%;"></div>
-              </div>
-              <span class="progress-text">${progress.toFixed(0)}%</span>
-            </div>
-          </td>
+          <td><div class="progress-cell"><div class="progress-container"><div class="progress-bar" style="width: ${progress}%;"></div></div><span class="progress-text">${progress.toFixed(0)}%</span></div></td>
           <td>${interest.toFixed(2)}%</td>
           <td>${formatCurrency(minPayment)}</td>
           <td>${debt.dueDate || '—'}</td>
@@ -655,85 +726,49 @@
         `;
         debtList.appendChild(row);
       });
-
       totalBalanceEl.textContent = formatCurrency(totalBalance);
       totalMinEl.textContent = formatCurrency(totalMin);
       const avgInterest = totalBalance > 0 ? (weightedInterestSum / totalBalance) : 0;
       avgInterestEl.textContent = avgInterest.toFixed(2) + '%';
     }
 
-    // Render completed debts in modal
     function renderCompletedDebts() {
       completedListContainer.innerHTML = '';
       if (completedDebts.length === 0) {
         completedListContainer.innerHTML = '<p class="empty">No completed debts yet.</p>';
         return;
       }
-
       let totalPaid = 0;
-
       const table = document.createElement('table');
       table.className = 'completed-table';
       table.innerHTML = `
-        <thead>
-          <tr>
-            <th>Debt Name</th>
-            <th>Creditor</th>
-            <th>Original Balance</th>
-            <th>Amount Paid</th>
-            <th>Completed On</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Debt Name</th><th>Creditor</th><th>Original Balance</th><th>Amount Paid</th><th>Completed On</th></tr></thead>
         <tbody>
           ${completedDebts.map(debt => {
             const initial = parseFloat(debt.initialBalance) || 0;
             const remaining = parseFloat(debt.balance) || 0;
             const amountPaid = Math.max(0, initial - remaining);
             totalPaid += amountPaid;
-            return `
-              <tr>
-                <td>${escapeHtml(debt.name)}</td>
-                <td>${escapeHtml(debt.creditor || '—')}</td>
-                <td>${formatCurrency(initial)}</td>
-                <td>${formatCurrency(amountPaid)}</td>
-                <td>${debt.completedAt ? new Date(debt.completedAt).toLocaleDateString() : '—'}</td>
-              </tr>
-            `;
+            return `<tr><td>${escapeHtml(debt.name)}</td><td>${escapeHtml(debt.creditor || '—')}</td><td>${formatCurrency(initial)}</td><td>${formatCurrency(amountPaid)}</td><td>${debt.completedAt ? new Date(debt.completedAt).toLocaleDateString() : '—'}</td></tr>`;
           }).join('')}
         </tbody>
       `;
       completedListContainer.appendChild(table);
-
       const summaryDiv = document.createElement('div');
       summaryDiv.className = 'completed-summary';
       summaryDiv.innerHTML = `Total Debts Completed: <strong>${completedDebts.length}</strong> &nbsp;|&nbsp; Total Amount Paid: <strong>${formatCurrency(totalPaid)}</strong>`;
       completedListContainer.appendChild(summaryDiv);
     }
 
-    // Event delegation for active table buttons
     debtList.addEventListener('click', (e) => {
       const target = e.target;
       const index = parseInt(target.dataset.index, 10);
-
-      if (target.classList.contains('action-btn')) {
-        currentPaymentIndex = index;
-        openPaymentModal(index);
-      }
-      if (target.classList.contains('edit-btn')) {
-        currentEditIndex = index;
-        openEditModal(index);
-      }
-      if (target.classList.contains('complete-btn')) {
-        currentCompleteIndex = index;
-        openCompleteModal(index);
-      }
-      if (target.classList.contains('delete-btn')) {
-        currentDeleteIndex = index;
-        openDeleteModal(index);
-      }
+      if (target.classList.contains('action-btn')) { currentPaymentIndex = index; openPaymentModal(index); }
+      if (target.classList.contains('edit-btn')) { currentEditIndex = index; openEditModal(index); }
+      if (target.classList.contains('complete-btn')) { currentCompleteIndex = index; openCompleteModal(index); }
+      if (target.classList.contains('delete-btn')) { currentDeleteIndex = index; openDeleteModal(index); }
     });
 
-    // ---------- Payment Modal ----------
     function openPaymentModal(index) {
       const debt = debts[index];
       paymentDebtName.textContent = `Debt: ${debt.name} — Current balance: ${formatCurrency(parseFloat(debt.balance) || 0)}`;
@@ -742,12 +777,7 @@
       paymentModal.style.display = 'flex';
       paymentInput.focus();
     }
-
-    function closePaymentModal() {
-      paymentModal.style.display = 'none';
-      currentPaymentIndex = null;
-    }
-
+    function closePaymentModal() { paymentModal.style.display = 'none'; currentPaymentIndex = null; }
     function updatePreviewProgress(paymentAmount) {
       if (currentPaymentIndex === null) return;
       const debt = debts[currentPaymentIndex];
@@ -760,46 +790,23 @@
       previewProgressBar.style.width = percent + '%';
       previewProgressText.textContent = percent.toFixed(0) + '%';
     }
-
-    paymentInput.addEventListener('input', (e) => {
-      const amount = parseFloat(e.target.value) || 0;
-      updatePreviewProgress(amount);
-    });
-
+    paymentInput.addEventListener('input', (e) => updatePreviewProgress(parseFloat(e.target.value) || 0));
     savePaymentBtn.addEventListener('click', () => {
       if (currentPaymentIndex === null) return;
       const paymentAmount = parseFloat(paymentInput.value);
-      if (isNaN(paymentAmount) || paymentAmount <= 0) {
-        alert('Please enter a valid payment amount (greater than 0).');
-        return;
-      }
-
+      if (isNaN(paymentAmount) || paymentAmount <= 0) { alert('Please enter a valid payment amount.'); return; }
       const currentBalance = parseFloat(debts[currentPaymentIndex].balance) || 0;
       let newBalance = currentBalance - paymentAmount;
-
-      if (newBalance < 0) {
-        newBalance = 0;
-        alert(`This payment exceeds the remaining balance. Balance set to $0.00.`);
-      }
-
+      if (newBalance < 0) { newBalance = 0; alert(`This payment exceeds the remaining balance. Balance set to $0.00.`); }
       debts[currentPaymentIndex].balance = newBalance;
       saveDebts(debts);
-      render();
-
+      renderDebts();
       const progressBar = document.querySelectorAll('.progress-bar')[currentPaymentIndex];
-      if (progressBar) {
-        progressBar.classList.add('pulse');
-        setTimeout(() => {
-          progressBar.classList.remove('pulse');
-        }, 800);
-      }
-
+      if (progressBar) { progressBar.classList.add('pulse'); setTimeout(() => progressBar.classList.remove('pulse'), 800); }
       closePaymentModal();
     });
-
     cancelPaymentBtn.addEventListener('click', closePaymentModal);
 
-    // ---------- Edit Modal ----------
     function openEditModal(index) {
       const debt = debts[index];
       editName.value = debt.name;
@@ -811,52 +818,31 @@
       editModal.style.display = 'flex';
       editName.focus();
     }
-
-    function closeEditModal() {
-      editModal.style.display = 'none';
-      currentEditIndex = null;
-    }
-
+    function closeEditModal() { editModal.style.display = 'none'; currentEditIndex = null; }
     saveEditBtn.addEventListener('click', () => {
       if (currentEditIndex === null) return;
-
       const name = editName.value.trim();
       const balance = parseFloat(editBalance.value);
-      if (!name) {
-        alert('Please enter a Debt Name.');
-        return;
-      }
-      if (isNaN(balance) || balance < 0) {
-        alert('Please enter a valid Balance (0 or more).');
-        return;
-      }
-
+      if (!name) { alert('Please enter a Debt Name.'); return; }
+      if (isNaN(balance) || balance < 0) { alert('Please enter a valid Balance (0 or more).'); return; }
       debts[currentEditIndex].name = name;
       debts[currentEditIndex].creditor = editCreditor.value.trim();
       debts[currentEditIndex].balance = balance;
       debts[currentEditIndex].interest = editInterest.value || '0';
       debts[currentEditIndex].minPayment = editMinPayment.value || '0';
       debts[currentEditIndex].dueDate = editDueDate.value;
-
       saveDebts(debts);
-      render();
+      renderDebts();
       closeEditModal();
     });
-
     cancelEditBtn.addEventListener('click', closeEditModal);
 
-    // ---------- Complete Modal ----------
     function openCompleteModal(index) {
       const debt = debts[index];
       completeDebtName.textContent = `Mark "${debt.name}" as completed and move to archive?`;
       completeModal.style.display = 'flex';
     }
-
-    function closeCompleteModal() {
-      completeModal.style.display = 'none';
-      currentCompleteIndex = null;
-    }
-
+    function closeCompleteModal() { completeModal.style.display = 'none'; currentCompleteIndex = null; }
     confirmCompleteBtn.addEventListener('click', () => {
       if (currentCompleteIndex === null) return;
       const completedDebt = debts[currentCompleteIndex];
@@ -865,150 +851,78 @@
       debts.splice(currentCompleteIndex, 1);
       saveDebts(debts);
       saveCompletedDebts(completedDebts);
-      render();
+      renderDebts();
       closeCompleteModal();
       launchFireworks(FIREWORKS_DURATION, BURST_COUNT, PARTICLE_COUNT);
     });
-
     cancelCompleteBtn.addEventListener('click', closeCompleteModal);
 
-    // ---------- Permanent Delete Modal ----------
     function openDeleteModal(index) {
       const debt = debts[index];
       deleteDebtName.textContent = `Permanently delete "${debt.name}"? This cannot be undone.`;
       deleteModal.style.display = 'flex';
     }
-
-    function closeDeleteModal() {
-      deleteModal.style.display = 'none';
-      currentDeleteIndex = null;
-    }
-
+    function closeDeleteModal() { deleteModal.style.display = 'none'; currentDeleteIndex = null; }
     confirmDeleteBtn.addEventListener('click', () => {
       if (currentDeleteIndex === null) return;
       debts.splice(currentDeleteIndex, 1);
       saveDebts(debts);
-      render();
+      renderDebts();
       closeDeleteModal();
     });
-
     cancelDeleteBtn.addEventListener('click', closeDeleteModal);
 
-    // ---------- Completed Modal ----------
-    completedBtn.addEventListener('click', () => {
-      renderCompletedDebts();
-      completedModal.style.display = 'flex';
-    });
+    completedBtn.addEventListener('click', () => { renderCompletedDebts(); completedModal.style.display = 'flex'; });
+    closeCompletedBtn.addEventListener('click', () => completedModal.style.display = 'none');
 
-    closeCompletedBtn.addEventListener('click', () => {
-      completedModal.style.display = 'none';
-    });
-
-    // Close modals when clicking outside
     window.addEventListener('click', (e) => {
       if (e.target === paymentModal) closePaymentModal();
       if (e.target === editModal) closeEditModal();
       if (e.target === completeModal) closeCompleteModal();
       if (e.target === deleteModal) closeDeleteModal();
       if (e.target === completedModal) completedModal.style.display = 'none';
+      if (e.target === spendModal) closeSpendModal();
+      if (e.target === deleteBudgetModal) closeDeleteBudgetModal();
+      if (e.target === archiveModal) closeArchiveModal();
     });
 
-    // ---------- Fireworks logic (for complete only) ----------
-    function resizeFireworksCanvas() {
-      fireworksCanvas.width = window.innerWidth;
-      fireworksCanvas.height = window.innerHeight;
-    }
-
+    // Fireworks functions
+    function resizeFireworksCanvas() { fireworksCanvas.width = window.innerWidth; fireworksCanvas.height = window.innerHeight; }
     function createBurst(x, y, particleCount) {
-      const colors = ['#ff4d4d', '#ffa64d', '#ffff4d', '#4dff4d', '#4d4dff', '#ff4dff', '#ffffff', '#ffcc00'];
+      const colors = ['#ff4d4d','#ffa64d','#ffff4d','#4dff4d','#4d4dff','#ff4dff','#ffffff','#ffcc00'];
       for (let i = 0; i < particleCount; i++) {
         const angle = Math.random() * Math.PI * 2;
         const speed = Math.random() * 5 + 2;
-        const vx = Math.cos(angle) * speed;
-        const vy = Math.sin(angle) * speed;
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        particles.push({
-          x: x,
-          y: y,
-          vx: vx,
-          vy: vy,
-          color: color,
-          alpha: 1,
-          life: Math.random() * 30 + 20
-        });
+        particles.push({ x, y, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed, color: colors[Math.floor(Math.random()*colors.length)], alpha: 1, life: Math.random()*30+20 });
       }
     }
-
     function animateFireworks(duration) {
       const now = Date.now();
-      if (now - fireworksStartTime > duration) {
-        stopFireworks();
-        return;
-      }
-
-      ctx.clearRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
-
+      if (now - fireworksStartTime > duration) { stopFireworks(); return; }
+      ctx.clearRect(0,0,fireworksCanvas.width, fireworksCanvas.height);
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.05;
-        p.alpha -= 0.01;
-        p.life--;
-
-        if (p.life <= 0 || p.alpha <= 0) {
-          particles.splice(i, 1);
-          continue;
-        }
-
-        ctx.globalAlpha = p.alpha;
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-        ctx.fill();
+        p.x += p.vx; p.y += p.vy; p.vy += 0.05; p.alpha -= 0.01; p.life--;
+        if (p.life <= 0 || p.alpha <= 0) { particles.splice(i,1); continue; }
+        ctx.globalAlpha = p.alpha; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x,p.y,2,0,Math.PI*2); ctx.fill();
       }
       ctx.globalAlpha = 1;
-
       animationFrame = requestAnimationFrame(() => animateFireworks(duration));
     }
-
     function stopFireworks() {
       fireworksActive = false;
-      if (animationFrame) {
-        cancelAnimationFrame(animationFrame);
-        animationFrame = null;
-      }
-      particles = [];
-      ctx.clearRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
-      fireworksCanvas.style.display = 'none';
+      if (animationFrame) cancelAnimationFrame(animationFrame);
+      animationFrame = null; particles = []; ctx.clearRect(0,0,fireworksCanvas.width, fireworksCanvas.height); fireworksCanvas.style.display = 'none';
     }
-
     function launchFireworks(duration, burstCount, particleCount) {
       if (fireworksActive) stopFireworks();
-      resizeFireworksCanvas();
-      fireworksCanvas.style.display = 'block';
-      fireworksActive = true;
-      fireworksStartTime = Date.now();
-
-      const bursts = [];
+      resizeFireworksCanvas(); fireworksCanvas.style.display = 'block'; fireworksActive = true; fireworksStartTime = Date.now();
       for (let i = 0; i < burstCount; i++) {
-        bursts.push({
-          x: Math.random() * fireworksCanvas.width,
-          y: Math.random() * fireworksCanvas.height * 0.7,
-          delay: i * 200
-        });
+        setTimeout(() => { if (fireworksActive) createBurst(Math.random()*fireworksCanvas.width, Math.random()*fireworksCanvas.height*0.7, particleCount); }, i*200);
       }
-
-      bursts.forEach(burst => {
-        setTimeout(() => {
-          if (fireworksActive) createBurst(burst.x, burst.y, particleCount);
-        }, burst.delay);
-      });
-
       animateFireworks(duration);
     }
 
-    // ---------- Add Debt ----------
     addBtn.addEventListener('click', () => {
       const name = document.getElementById('name').value.trim();
       const creditor = document.getElementById('creditor').value.trim();
@@ -1016,40 +930,247 @@
       const interest = document.getElementById('interest').value || '0';
       const minPayment = document.getElementById('minPayment').value || '0';
       const dueDate = document.getElementById('dueDate').value;
-
-      if (!name) {
-        alert('Please enter a Debt Name.');
-        return;
-      }
-      if (!balance || parseFloat(balance) <= 0) {
-        alert('Please enter a valid Balance (greater than 0).');
-        return;
-      }
-
+      if (!name) { alert('Please enter a Debt Name.'); return; }
+      if (!balance || parseFloat(balance) <= 0) { alert('Please enter a valid Balance (greater than 0).'); return; }
       const initialBalance = parseFloat(balance);
-      debts.push({ 
-        name, 
-        creditor, 
-        balance: initialBalance, 
-        initialBalance, 
-        interest, 
-        minPayment, 
-        dueDate 
-      });
+      debts.push({ name, creditor, balance: initialBalance, initialBalance, interest, minPayment, dueDate });
       saveDebts(debts);
-      render();
-
-      document.getElementById('name').value = '';
-      document.getElementById('creditor').value = '';
-      document.getElementById('balance').value = '';
-      document.getElementById('interest').value = '';
-      document.getElementById('minPayment').value = '';
-      document.getElementById('dueDate').value = '';
+      renderDebts();
+      document.getElementById('name').value = ''; document.getElementById('creditor').value = ''; document.getElementById('balance').value = ''; document.getElementById('interest').value = ''; document.getElementById('minPayment').value = ''; document.getElementById('dueDate').value = '';
       document.getElementById('name').focus();
     });
 
-    // Initial render
-    render();
+    // ========== WEEKLY BUDGET CODE ==========
+    const weeklyIncomeInput = document.getElementById('weeklyIncome');
+    const setWeeklyIncomeBtn = document.getElementById('setWeeklyIncomeBtn');
+    const weekCatName = document.getElementById('weekCatName');
+    const weekCatBudget = document.getElementById('weekCatBudget');
+    const addWeekCatBtn = document.getElementById('addWeekCatBtn');
+    const weeklyBudgetList = document.getElementById('weeklyBudgetList');
+    const budgetEmpty = document.getElementById('budgetEmpty');
+    const weekIncomeDisplay = document.getElementById('weekIncomeDisplay');
+    const weekTotalBudget = document.getElementById('weekTotalBudget');
+    const weekLeftToBudget = document.getElementById('weekLeftToBudget');
+    const weekTotalSpent = document.getElementById('weekTotalSpent');
+    const weekRemaining = document.getElementById('weekRemaining');
+    const resetWeekBtn = document.getElementById('resetWeekBtn');
+    const archiveBtn = document.getElementById('archiveBtn');
+
+    const spendModal = document.getElementById('spendModal');
+    const spendCategoryName = document.getElementById('spendCategoryName');
+    const spendAmount = document.getElementById('spendAmount');
+    const saveSpendBtn = document.getElementById('saveSpend');
+    const cancelSpendBtn = document.getElementById('cancelSpend');
+
+    const deleteBudgetModal = document.getElementById('deleteBudgetModal');
+    const deleteBudgetName = document.getElementById('deleteBudgetName');
+    const confirmDeleteBudgetBtn = document.getElementById('confirmDeleteBudget');
+    const cancelDeleteBudgetBtn = document.getElementById('cancelDeleteBudget');
+
+    const archiveModal = document.getElementById('archiveModal');
+    const archiveListContainer = document.getElementById('archiveListContainer');
+    const closeArchiveBtn = document.getElementById('closeArchive');
+    const archiveTotalSummary = document.getElementById('archiveTotalSummary');
+
+    const BUDGET_STORAGE_KEY = 'debtTrackerWeeklyBudget';
+    const ARCHIVE_STORAGE_KEY = 'debtTrackerWeeklyArchive';
+    let weeklyIncome = 0;
+    let weekCategories = []; // { name, budget, spent }
+    let weeklyArchive = []; // Array of { date, categories: [{name, budget, spent}] }
+    let currentSpendIndex = null;
+    let currentDeleteBudgetIndex = null;
+
+    function loadWeeklyBudget() {
+      try {
+        const stored = localStorage.getItem(BUDGET_STORAGE_KEY);
+        if (stored) {
+          const data = JSON.parse(stored);
+          weeklyIncome = data.weeklyIncome || 0;
+          weekCategories = data.categories || [];
+        }
+      } catch (err) { console.error('Error loading weekly budget:', err); }
+    }
+
+    function saveWeeklyBudget() {
+      try {
+        localStorage.setItem(BUDGET_STORAGE_KEY, JSON.stringify({ weeklyIncome, categories: weekCategories }));
+      } catch (err) { alert('Could not save weekly budget.'); }
+    }
+
+    function loadWeeklyArchive() {
+      try {
+        const stored = localStorage.getItem(ARCHIVE_STORAGE_KEY);
+        if (stored) {
+          weeklyArchive = JSON.parse(stored);
+        }
+      } catch (err) { console.error('Error loading weekly archive:', err); }
+    }
+
+    function saveWeeklyArchive() {
+      try {
+        localStorage.setItem(ARCHIVE_STORAGE_KEY, JSON.stringify(weeklyArchive));
+      } catch (err) { alert('Could not save weekly archive.'); }
+    }
+
+    function renderWeeklyBudget() {
+      weeklyBudgetList.innerHTML = '';
+      budgetEmpty.style.display = weekCategories.length === 0 ? 'block' : 'none';
+      weekCategories.forEach((cat, index) => {
+        const remaining = cat.budget - cat.spent;
+        const percent = Math.min(100, (cat.spent / cat.budget) * 100);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${escapeHtml(cat.name)}</td>
+          <td>${formatCurrency(cat.budget)}</td>
+          <td>${formatCurrency(cat.spent)}</td>
+          <td>${formatCurrency(remaining)}</td>
+          <td><div class="budget-progress-cell"><div class="budget-progress-container"><div class="budget-progress-bar" style="width: ${percent}%;"></div></div><span class="budget-progress-text">${percent.toFixed(0)}%</span></div></td>
+          <td>
+            <button class="action-btn" data-index="${index}">+ Spend</button>
+            <button class="delete-btn" data-index="${index}">Delete</button>
+          </td>
+        `;
+        weeklyBudgetList.appendChild(row);
+      });
+      updateWeeklySummary();
+    }
+
+    function updateWeeklySummary() {
+      weekIncomeDisplay.textContent = formatCurrency(weeklyIncome);
+      const totalBudget = weekCategories.reduce((sum, cat) => sum + cat.budget, 0);
+      const totalSpent = weekCategories.reduce((sum, cat) => sum + cat.spent, 0);
+      const leftToBudget = weeklyIncome - totalBudget;
+      weekTotalBudget.textContent = formatCurrency(totalBudget);
+      weekLeftToBudget.textContent = formatCurrency(leftToBudget);
+      weekTotalSpent.textContent = formatCurrency(totalSpent);
+      weekRemaining.textContent = formatCurrency(weeklyIncome - totalSpent);
+    }
+
+    setWeeklyIncomeBtn.addEventListener('click', () => {
+      const val = parseFloat(weeklyIncomeInput.value);
+      if (isNaN(val) || val < 0) { alert('Please enter a valid take home pay.'); return; }
+      weeklyIncome = val;
+      saveWeeklyBudget();
+      updateWeeklySummary();
+      weeklyIncomeInput.value = '';
+    });
+
+    addWeekCatBtn.addEventListener('click', () => {
+      const name = weekCatName.value.trim();
+      const budget = parseFloat(weekCatBudget.value);
+      if (!name) { alert('Please enter a category name.'); return; }
+      if (isNaN(budget) || budget <= 0) { alert('Please enter a valid weekly budget.'); return; }
+      weekCategories.push({ name, budget, spent: 0 });
+      saveWeeklyBudget();
+      renderWeeklyBudget();
+      weekCatName.value = ''; weekCatBudget.value = '';
+    });
+
+    weeklyBudgetList.addEventListener('click', (e) => {
+      const target = e.target;
+      const index = parseInt(target.dataset.index, 10);
+      if (target.classList.contains('action-btn')) {
+        currentSpendIndex = index;
+        spendCategoryName.textContent = `Category: ${weekCategories[index].name} — Spent: ${formatCurrency(weekCategories[index].spent)} / Budget: ${formatCurrency(weekCategories[index].budget)}`;
+        spendAmount.value = '';
+        spendModal.style.display = 'flex';
+        spendAmount.focus();
+      }
+      if (target.classList.contains('delete-btn')) {
+        currentDeleteBudgetIndex = index;
+        deleteBudgetName.textContent = `Delete category "${weekCategories[index].name}"? This will remove it and its spending.`;
+        deleteBudgetModal.style.display = 'flex';
+      }
+    });
+
+    function closeSpendModal() { spendModal.style.display = 'none'; currentSpendIndex = null; }
+    cancelSpendBtn.addEventListener('click', closeSpendModal);
+    saveSpendBtn.addEventListener('click', () => {
+      if (currentSpendIndex === null) return;
+      const amount = parseFloat(spendAmount.value);
+      if (isNaN(amount) || amount <= 0) { alert('Please enter a valid amount.'); return; }
+      weekCategories[currentSpendIndex].spent += amount;
+      saveWeeklyBudget();
+      renderWeeklyBudget();
+      closeSpendModal();
+    });
+
+    // Delete budget category modal
+    function closeDeleteBudgetModal() { deleteBudgetModal.style.display = 'none'; currentDeleteBudgetIndex = null; }
+    cancelDeleteBudgetBtn.addEventListener('click', closeDeleteBudgetModal);
+    confirmDeleteBudgetBtn.addEventListener('click', () => {
+      if (currentDeleteBudgetIndex === null) return;
+      weekCategories.splice(currentDeleteBudgetIndex, 1);
+      saveWeeklyBudget();
+      renderWeeklyBudget();
+      closeDeleteBudgetModal();
+    });
+
+    // Start New Week: archive current week, then clear all categories
+    resetWeekBtn.addEventListener('click', () => {
+      // Archive current week data (with categories and spending)
+      const archiveEntry = {
+        date: new Date().toISOString(),
+        categories: JSON.parse(JSON.stringify(weekCategories))
+      };
+      weeklyArchive.push(archiveEntry);
+      saveWeeklyArchive();
+
+      // Clear categories completely so user can re-enter manually
+      weekCategories = [];
+      saveWeeklyBudget();
+      renderWeeklyBudget();
+    });
+
+    // Archive modal
+    function renderArchive() {
+      archiveListContainer.innerHTML = '';
+      let totalSpentAll = 0;
+      let totalBudgetAll = 0;
+
+      if (weeklyArchive.length === 0) {
+        archiveListContainer.innerHTML = '<p class="empty">No archived weeks yet.</p>';
+      } else {
+        weeklyArchive.slice().reverse().forEach((week) => {
+          const totalSpent = week.categories.reduce((sum, cat) => sum + cat.spent, 0);
+          const totalBudget = week.categories.reduce((sum, cat) => sum + cat.budget, 0);
+          totalSpentAll += totalSpent;
+          totalBudgetAll += totalBudget;
+          const totalSaved = totalBudget - totalSpent; // Positive means underspent, negative overspent
+          const dateStr = new Date(week.date).toLocaleDateString();
+          const div = document.createElement('div');
+          div.style.marginBottom = '16px';
+          div.innerHTML = `
+            <strong>Week of ${dateStr}</strong> — 
+            Total Spent: ${formatCurrency(totalSpent)} | 
+            Total Saved: ${formatCurrency(totalSaved)}
+            <table class="archive-table">
+              <thead><tr><th>Category</th><th>Budgeted</th><th>Spent</th></tr></thead>
+              <tbody>
+                ${week.categories.map(cat => `<tr><td>${escapeHtml(cat.name)}</td><td>${formatCurrency(cat.budget)}</td><td>${formatCurrency(cat.spent)}</td></tr>`).join('')}
+              </tbody>
+            </table>
+          `;
+          archiveListContainer.appendChild(div);
+        });
+      }
+
+      const totalSavedAll = totalBudgetAll - totalSpentAll;
+      archiveTotalSummary.innerHTML = `All Weeks — Total Spent: ${formatCurrency(totalSpentAll)} | Total Saved: ${formatCurrency(totalSavedAll)}`;
+    }
+
+    archiveBtn.addEventListener('click', () => {
+      renderArchive();
+      archiveModal.style.display = 'flex';
+    });
+    function closeArchiveModal() { archiveModal.style.display = 'none'; }
+    closeArchiveBtn.addEventListener('click', closeArchiveModal);
+
+    // Initial loads and renders
+    loadWeeklyBudget();
+    loadWeeklyArchive();
+    renderWeeklyBudget();
+    renderDebts();
   </script>
 </body>
 </html>
