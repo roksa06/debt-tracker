@@ -113,11 +113,12 @@
       letter-spacing: 0.5px;
       font-weight: 600;
     }
-    .action-btn, .delete-btn {
-      padding: 8px 14px;
+    .action-btn, .edit-btn, .complete-btn, .delete-btn {
+      padding: 8px 12px;
       border-radius: 20px;
-      font-size: 14px;
+      font-size: 13px;
       margin-right: 6px;
+      margin-bottom: 4px;
       border: none;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -131,6 +132,24 @@
       background: linear-gradient(135deg, #2563eb, #1d4ed8);
       transform: translateY(-1px);
       box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+    }
+    .edit-btn {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+    }
+    .edit-btn:hover {
+      background: linear-gradient(135deg, #d97706, #b45309);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+    }
+    .complete-btn {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+    }
+    .complete-btn:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
     }
     .delete-btn {
       background: linear-gradient(135deg, #ef4444, #dc2626);
@@ -231,12 +250,13 @@
     }
     .modal-content input {
       width: 100%;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
     .modal-buttons {
       display: flex;
       justify-content: flex-end;
       gap: 10px;
+      margin-top: 16px;
     }
     .modal-buttons button {
       padding: 8px 16px;
@@ -245,12 +265,18 @@
       cursor: pointer;
       font-weight: 600;
     }
-    #savePayment, #confirmDelete {
+    #savePayment, #saveEdit, #confirmComplete, #confirmDelete {
       background: #2563eb;
       color: white;
     }
-    #savePayment:hover, #confirmDelete:hover {
+    #savePayment:hover, #saveEdit:hover, #confirmComplete:hover, #confirmDelete:hover {
       background: #1d4ed8;
+    }
+    #confirmComplete {
+      background: #10b981;
+    }
+    #confirmComplete:hover {
+      background: #059669;
     }
     #confirmDelete {
       background: #ef4444;
@@ -258,11 +284,11 @@
     #confirmDelete:hover {
       background: #dc2626;
     }
-    #cancelPayment, #cancelDelete, #closeCompleted {
+    #cancelPayment, #cancelEdit, #cancelComplete, #cancelDelete, #closeCompleted {
       background: #444;
       color: white;
     }
-    #cancelPayment:hover, #cancelDelete:hover, #closeCompleted:hover {
+    #cancelPayment:hover, #cancelEdit:hover, #cancelComplete:hover, #cancelDelete:hover, #closeCompleted:hover {
       background: #555;
     }
     /* Live preview in modal */
@@ -392,14 +418,43 @@
     </div>
   </div>
 
-  <!-- Delete Confirmation Modal -->
-  <div id="deleteModal" class="modal">
+  <!-- Edit Debt Modal -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <h2>Edit Debt</h2>
+      <input type="text" id="editName" placeholder="Debt name *">
+      <input type="text" id="editCreditor" placeholder="Creditor">
+      <input type="number" id="editBalance" placeholder="Balance *" step="0.01" min="0">
+      <input type="number" id="editInterest" placeholder="Interest rate %" step="0.01" min="0">
+      <input type="number" id="editMinPayment" placeholder="Minimum payment" step="0.01" min="0">
+      <input type="date" id="editDueDate">
+      <div class="modal-buttons">
+        <button id="cancelEdit">Cancel</button>
+        <button id="saveEdit">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Complete Debt Modal -->
+  <div id="completeModal" class="modal">
     <div class="modal-content">
       <h2>Complete Debt</h2>
+      <p id="completeDebtName" style="margin-bottom:16px;"></p>
+      <div class="modal-buttons">
+        <button id="cancelComplete">Cancel</button>
+        <button id="confirmComplete">Mark as Completed</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Permanent Delete Modal -->
+  <div id="deleteModal" class="modal">
+    <div class="modal-content">
+      <h2>Delete Debt</h2>
       <p id="deleteDebtName" style="margin-bottom:16px;"></p>
       <div class="modal-buttons">
         <button id="cancelDelete">Cancel</button>
-        <button id="confirmDelete">Mark as Completed</button>
+        <button id="confirmDelete">Delete Permanently</button>
       </div>
     </div>
   </div>
@@ -421,6 +476,7 @@
   <canvas id="fireworksCanvas"></canvas>
 
   <script>
+    // DOM elements
     const addBtn = document.getElementById('addBtn');
     const debtList = document.getElementById('debtList');
     const emptyMessage = document.getElementById('emptyMessage');
@@ -429,7 +485,7 @@
     const avgInterestEl = document.getElementById('avgInterest');
     const completedBtn = document.getElementById('completedBtn');
 
-    // Payment modal elements
+    // Payment modal
     const paymentModal = document.getElementById('paymentModal');
     const paymentInput = document.getElementById('paymentInput');
     const paymentDebtName = document.getElementById('paymentDebtName');
@@ -438,18 +494,35 @@
     const previewProgressBar = document.getElementById('previewProgressBar');
     const previewProgressText = document.getElementById('previewProgressText');
 
-    // Delete modal elements
+    // Edit modal
+    const editModal = document.getElementById('editModal');
+    const editName = document.getElementById('editName');
+    const editCreditor = document.getElementById('editCreditor');
+    const editBalance = document.getElementById('editBalance');
+    const editInterest = document.getElementById('editInterest');
+    const editMinPayment = document.getElementById('editMinPayment');
+    const editDueDate = document.getElementById('editDueDate');
+    const saveEditBtn = document.getElementById('saveEdit');
+    const cancelEditBtn = document.getElementById('cancelEdit');
+
+    // Complete modal
+    const completeModal = document.getElementById('completeModal');
+    const completeDebtName = document.getElementById('completeDebtName');
+    const confirmCompleteBtn = document.getElementById('confirmComplete');
+    const cancelCompleteBtn = document.getElementById('cancelComplete');
+
+    // Permanent delete modal
     const deleteModal = document.getElementById('deleteModal');
     const deleteDebtName = document.getElementById('deleteDebtName');
     const confirmDeleteBtn = document.getElementById('confirmDelete');
     const cancelDeleteBtn = document.getElementById('cancelDelete');
 
-    // Completed modal elements
+    // Completed modal
     const completedModal = document.getElementById('completedModal');
     const completedListContainer = document.getElementById('completedListContainer');
     const closeCompletedBtn = document.getElementById('closeCompleted');
 
-    // Fireworks canvas
+    // Fireworks
     const fireworksCanvas = document.getElementById('fireworksCanvas');
     const ctx = fireworksCanvas.getContext('2d');
     let particles = [];
@@ -460,18 +533,26 @@
     const BURST_COUNT = 10;
     const PARTICLE_COUNT = 100;
 
+    // Storage keys
     const STORAGE_KEY = 'debtTrackerDebts';
     const COMPLETED_STORAGE_KEY = 'debtTrackerCompletedDebts';
 
+    // State
+    let debts = loadDebts();
+    let completedDebts = loadCompletedDebts();
+    let currentEditIndex = null;
+    let currentPaymentIndex = null;
+    let currentCompleteIndex = null;
+    let currentDeleteIndex = null;
+
+    // Helper functions
     function loadDebts() {
       try {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
-          const debts = JSON.parse(stored);
-          return debts.map(debt => {
-            if (!debt.initialBalance) {
-              debt.initialBalance = debt.balance;
-            }
+          const parsed = JSON.parse(stored);
+          return parsed.map(debt => {
+            if (!debt.initialBalance) debt.initialBalance = debt.balance;
             return debt;
           });
         }
@@ -496,7 +577,7 @@
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(debts));
       } catch (err) {
-        alert('Could not save debt. Your browser may be blocking localStorage. Error: ' + err.message);
+        alert('Could not save debt. Error: ' + err.message);
       }
     }
 
@@ -507,11 +588,6 @@
         alert('Could not save completed debts. Error: ' + err.message);
       }
     }
-
-    let debts = loadDebts();
-    let completedDebts = loadCompletedDebts();
-    let currentEditIndex = null;
-    let currentDeleteIndex = null;
 
     function formatCurrency(value) {
       return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
@@ -533,6 +609,7 @@
       return percent;
     }
 
+    // Render active debts
     function render() {
       debtList.innerHTML = '';
       emptyMessage.style.display = debts.length === 0 ? 'block' : 'none';
@@ -570,7 +647,9 @@
           <td>${debt.dueDate || '—'}</td>
           <td>
             <button class="action-btn" data-index="${index}">Make Payment</button>
-            <button class="delete-btn" data-index="${index}">Complete</button>
+            <button class="edit-btn" data-index="${index}">Edit</button>
+            <button class="complete-btn" data-index="${index}">Complete</button>
+            <button class="delete-btn" data-index="${index}">Delete</button>
           </td>
         `;
         debtList.appendChild(row);
@@ -582,6 +661,7 @@
       avgInterestEl.textContent = avgInterest.toFixed(2) + '%';
     }
 
+    // Render completed debts in modal
     function renderCompletedDebts() {
       completedListContainer.innerHTML = '';
       if (completedDebts.length === 0) {
@@ -629,22 +709,31 @@
       completedListContainer.appendChild(summaryDiv);
     }
 
-    // Event delegation for table buttons
+    // Event delegation for active table buttons
     debtList.addEventListener('click', (e) => {
       const target = e.target;
+      const index = parseInt(target.dataset.index, 10);
+
       if (target.classList.contains('action-btn')) {
-        const index = parseInt(target.dataset.index, 10);
+        currentPaymentIndex = index;
         openPaymentModal(index);
       }
+      if (target.classList.contains('edit-btn')) {
+        currentEditIndex = index;
+        openEditModal(index);
+      }
+      if (target.classList.contains('complete-btn')) {
+        currentCompleteIndex = index;
+        openCompleteModal(index);
+      }
       if (target.classList.contains('delete-btn')) {
-        const index = parseInt(target.dataset.index, 10);
+        currentDeleteIndex = index;
         openDeleteModal(index);
       }
     });
 
-    // Payment modal functions
+    // ---------- Payment Modal ----------
     function openPaymentModal(index) {
-      currentEditIndex = index;
       const debt = debts[index];
       paymentDebtName.textContent = `Debt: ${debt.name} — Current balance: ${formatCurrency(parseFloat(debt.balance) || 0)}`;
       paymentInput.value = '';
@@ -655,12 +744,12 @@
 
     function closePaymentModal() {
       paymentModal.style.display = 'none';
-      currentEditIndex = null;
+      currentPaymentIndex = null;
     }
 
     function updatePreviewProgress(paymentAmount) {
-      if (currentEditIndex === null) return;
-      const debt = debts[currentEditIndex];
+      if (currentPaymentIndex === null) return;
+      const debt = debts[currentPaymentIndex];
       const initial = parseFloat(debt.initialBalance) || 0;
       const current = parseFloat(debt.balance) || 0;
       const newBalance = Math.max(0, current - paymentAmount);
@@ -677,14 +766,14 @@
     });
 
     savePaymentBtn.addEventListener('click', () => {
-      if (currentEditIndex === null) return;
+      if (currentPaymentIndex === null) return;
       const paymentAmount = parseFloat(paymentInput.value);
       if (isNaN(paymentAmount) || paymentAmount <= 0) {
         alert('Please enter a valid payment amount (greater than 0).');
         return;
       }
 
-      const currentBalance = parseFloat(debts[currentEditIndex].balance) || 0;
+      const currentBalance = parseFloat(debts[currentPaymentIndex].balance) || 0;
       let newBalance = currentBalance - paymentAmount;
 
       if (newBalance < 0) {
@@ -692,11 +781,11 @@
         alert(`This payment exceeds the remaining balance. Balance set to $0.00.`);
       }
 
-      debts[currentEditIndex].balance = newBalance;
+      debts[currentPaymentIndex].balance = newBalance;
       saveDebts(debts);
       render();
 
-      const progressBar = document.querySelectorAll('.progress-bar')[currentEditIndex];
+      const progressBar = document.querySelectorAll('.progress-bar')[currentPaymentIndex];
       if (progressBar) {
         progressBar.classList.add('pulse');
         setTimeout(() => {
@@ -709,11 +798,83 @@
 
     cancelPaymentBtn.addEventListener('click', closePaymentModal);
 
-    // Delete modal functions
-    function openDeleteModal(index) {
-      currentDeleteIndex = index;
+    // ---------- Edit Modal ----------
+    function openEditModal(index) {
       const debt = debts[index];
-      deleteDebtName.textContent = `Mark "${debt.name}" as completed and move to archive?`;
+      editName.value = debt.name;
+      editCreditor.value = debt.creditor || '';
+      editBalance.value = debt.balance;
+      editInterest.value = debt.interest;
+      editMinPayment.value = debt.minPayment;
+      editDueDate.value = debt.dueDate || '';
+      editModal.style.display = 'flex';
+      editName.focus();
+    }
+
+    function closeEditModal() {
+      editModal.style.display = 'none';
+      currentEditIndex = null;
+    }
+
+    saveEditBtn.addEventListener('click', () => {
+      if (currentEditIndex === null) return;
+
+      const name = editName.value.trim();
+      const balance = parseFloat(editBalance.value);
+      if (!name) {
+        alert('Please enter a Debt Name.');
+        return;
+      }
+      if (isNaN(balance) || balance < 0) {
+        alert('Please enter a valid Balance (0 or more).');
+        return;
+      }
+
+      debts[currentEditIndex].name = name;
+      debts[currentEditIndex].creditor = editCreditor.value.trim();
+      debts[currentEditIndex].balance = balance;
+      debts[currentEditIndex].interest = editInterest.value || '0';
+      debts[currentEditIndex].minPayment = editMinPayment.value || '0';
+      debts[currentEditIndex].dueDate = editDueDate.value;
+
+      saveDebts(debts);
+      render();
+      closeEditModal();
+    });
+
+    cancelEditBtn.addEventListener('click', closeEditModal);
+
+    // ---------- Complete Modal ----------
+    function openCompleteModal(index) {
+      const debt = debts[index];
+      completeDebtName.textContent = `Mark "${debt.name}" as completed and move to archive?`;
+      completeModal.style.display = 'flex';
+    }
+
+    function closeCompleteModal() {
+      completeModal.style.display = 'none';
+      currentCompleteIndex = null;
+    }
+
+    confirmCompleteBtn.addEventListener('click', () => {
+      if (currentCompleteIndex === null) return;
+      const completedDebt = debts[currentCompleteIndex];
+      completedDebt.completedAt = new Date().toISOString();
+      completedDebts.push(completedDebt);
+      debts.splice(currentCompleteIndex, 1);
+      saveDebts(debts);
+      saveCompletedDebts(completedDebts);
+      render();
+      closeCompleteModal();
+      launchFireworks(FIREWORKS_DURATION, BURST_COUNT, PARTICLE_COUNT);
+    });
+
+    cancelCompleteBtn.addEventListener('click', closeCompleteModal);
+
+    // ---------- Permanent Delete Modal ----------
+    function openDeleteModal(index) {
+      const debt = debts[index];
+      deleteDebtName.textContent = `Permanently delete "${debt.name}"? This cannot be undone.`;
       deleteModal.style.display = 'flex';
     }
 
@@ -724,20 +885,15 @@
 
     confirmDeleteBtn.addEventListener('click', () => {
       if (currentDeleteIndex === null) return;
-      const completedDebt = debts[currentDeleteIndex];
-      completedDebt.completedAt = new Date().toISOString();
-      completedDebts.push(completedDebt);
       debts.splice(currentDeleteIndex, 1);
       saveDebts(debts);
-      saveCompletedDebts(completedDebts);
       render();
       closeDeleteModal();
-      launchFireworks(FIREWORKS_DURATION, BURST_COUNT, PARTICLE_COUNT);
     });
 
     cancelDeleteBtn.addEventListener('click', closeDeleteModal);
 
-    // Completed modal functions
+    // ---------- Completed Modal ----------
     completedBtn.addEventListener('click', () => {
       renderCompletedDebts();
       completedModal.style.display = 'flex';
@@ -750,13 +906,13 @@
     // Close modals when clicking outside
     window.addEventListener('click', (e) => {
       if (e.target === paymentModal) closePaymentModal();
+      if (e.target === editModal) closeEditModal();
+      if (e.target === completeModal) closeCompleteModal();
       if (e.target === deleteModal) closeDeleteModal();
-      if (e.target === completedModal) {
-        completedModal.style.display = 'none';
-      }
+      if (e.target === completedModal) completedModal.style.display = 'none';
     });
 
-    // Fireworks logic
+    // ---------- Fireworks logic (for complete only) ----------
     function resizeFireworksCanvas() {
       fireworksCanvas.width = window.innerWidth;
       fireworksCanvas.height = window.innerHeight;
@@ -827,9 +983,7 @@
     }
 
     function launchFireworks(duration, burstCount, particleCount) {
-      if (fireworksActive) {
-        stopFireworks();
-      }
+      if (fireworksActive) stopFireworks();
       resizeFireworksCanvas();
       fireworksCanvas.style.display = 'block';
       fireworksActive = true;
@@ -846,16 +1000,14 @@
 
       bursts.forEach(burst => {
         setTimeout(() => {
-          if (fireworksActive) {
-            createBurst(burst.x, burst.y, particleCount);
-          }
+          if (fireworksActive) createBurst(burst.x, burst.y, particleCount);
         }, burst.delay);
       });
 
       animateFireworks(duration);
     }
 
-    // Add debt
+    // ---------- Add Debt ----------
     addBtn.addEventListener('click', () => {
       const name = document.getElementById('name').value.trim();
       const creditor = document.getElementById('creditor').value.trim();
@@ -895,6 +1047,7 @@
       document.getElementById('name').focus();
     });
 
+    // Initial render
     render();
   </script>
 </body>
